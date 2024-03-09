@@ -34,6 +34,16 @@ services:
     networks:
       - backend
 
+  frontend:
+    container_name: frontend
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    networks:
+      - backend
+
   api-gateway:
     container_name: api-gateway
     build:
