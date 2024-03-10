@@ -71,3 +71,9 @@ services:
 networks:
   backend:
 ```
+
+To add necessary env variables for kubernetes:
+
+```
+kubectl create secret generic vite-gateway-baseurl --from-literal=VITE_GATEWAY_BASEURL='http://127.0.0.1:8080'
+```
