@@ -1,79 +1,101 @@
 # DailyGrind
 
-## Use this `docker-compose` file to start all services
+## Project Overview
 
-```yaml
-version: '3'
-services:
-  zookeeper:
-    container_name: zookeeper
-    image: 'confluentinc/cp-zookeeper:latest'
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - '2181:2181'
-    networks:
-      - backend
+This project is a microservices-based application that uses Docker and Kubernetes for containerization and orchestration. The application consists of the following services:
 
-  kafka:
-    container_name: kafka
-    image: 'confluentinc/cp-kafka:latest'
-    depends_on: 
-      - zookeeper
-    ports: 
-      - '9092:9092'
-      - '29092:29092'
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - backend
+- **Zookeeper**: A service used for maintaining configuration information, naming, providing distributed synchronization, and providing group services.
 
-  frontend:
-    container_name: frontend
-    build:
-      context: ./Frontend
-      dockerfile: Dockerfile
-    ports:
-      - '3000:3000'
-    networks:
-      - backend
+- **Kafka**: A distributed streaming platform used for building real-time data pipelines and streaming apps. In this project, it's used as a message broker between services.
 
-  api-gateway:
-    container_name: api-gateway
-    build:
-      context: ./API-Gateway
-      dockerfile: ./API-Gateway/Dockerfile
-    ports:
-      - '8080:8080'
-    depends_on:
-      - kafka
-    networks:
-      - backend
+- **Frontend**: The user interface of the application, built with React.
 
-  post-service:
-    container_name: post-service
-    build:
-      context: ./Post-Service
-      dockerfile: ./Post-Service/Dockerfile
-    ports:
-      - '8081:8081'
-    depends_on:
-      - kafka
-    networks:
-      - backend
+- **API Gateway**: A service that acts as a single entry point into the system, allowing multiple APIs or microservices to act cohesively and provide a uniform experience to the user.
 
-networks:
-  backend:
+- **Post Service**: A service responsible for handling all the operations related to posts in the application.
+
+## Converting Docker Compose to Kubernetes
+
+1. Navigate to the directory containing your `docker-compose.yml` file.
+
+2. Run the `kompose convert` command. This will convert your Docker Compose file to files that you can use with `kubectl`.
+
+```bash
+kompose convert
 ```
 
-To add necessary env variables for kubernetes:
+You will see output similar to the following:
+```bash
+INFO Kubernetes file "zookeeper-service.yaml" created 
+INFO Kubernetes file "kafka-service.yaml" created 
+INFO Kubernetes file "frontend-service.yaml" created 
+INFO Kubernetes file "api-gateway-service.yaml" created 
+INFO Kubernetes file "post-service-service.yaml" created 
+INFO Kubernetes file "zookeeper-deployment.yaml" created 
+INFO Kubernetes file "kafka-deployment.yaml" created 
+INFO Kubernetes file "frontend-deployment.yaml" created 
+INFO Kubernetes file "api-gateway-deployment.yaml" created 
+INFO Kubernetes file "post-service-deployment.yaml" created
+```
 
+## Deploying the Application to Kubernetes
+
+3. Start a Kubernetes cluster with:
+```Bash
+minikube start
 ```
-kubectl create secret generic vite-gateway-baseurl --from-literal=VITE_GATEWAY_BASEURL='http://127.0.0.1:8080'
+
+You will see output similar to the following:
+```Bash
+😄  minikube v1.32.0 on Microsoft Windows 10 Home 10.0.19045.4046 Build 19045.4046
+✨  Using the docker driver based on existing profile
+👍  Starting control plane node minikube in cluster minikube
+🚜  Pulling base image ...
+🔄  Restarting existing docker container for "minikube" ...
+🐳  Preparing Kubernetes v1.28.3 on Docker 24.0.7 ...
+🔗  Configuring bridge CNI (Container Networking Interface) ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image docker.io/kubernetesui/dashboard:v2.7.0
+    ▪ Using image docker.io/kubernetesui/metrics-scraper:v1.0.8
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+💡  Some dashboard features require the metrics-server addon. To enable all features please run:
+
+        minikube addons enable metrics-server
+
+
+🌟  Enabled addons: storage-provisioner, default-storageclass, dashboard
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
 ```
+
+4. Apply the generated Kubernetes configuration files using `kubectl apply -f ./`.
+
+5. To access the frontend and API gateway on your local machine, you need to port forward the services:
+
+```bash
+kubectl port-forward service/frontend 3000:3000
+kubectl port-forward service/api-gateway 8080:8080
+```
+This will allow you to access the frontend at `http://localhost:3000`, because the app is only accessable from within the cluster.
+
+6. Open your web browser and navigate to `http://localhost:3000` to access the frontend.
+
+## Kubernetes dashboard
+
+To start the dashboard to view your Kubernetes deployment:
+
+```Bash
+minikube dashboard
+```
+
+You will see output similar to the following:
+
+```Bash
+🤔  Verifying dashboard health ...
+🚀  Launching proxy ...
+🤔  Verifying proxy health ...
+🎉  Opening http://127.0.0.1:51621/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/ in your default browser...
+```
+
+## Cleaning Up
+After you are finished testing out the application deployment, simply run the following command in your shell to delete the resources used.
+`kubectl delete -f ./`
