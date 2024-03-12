@@ -99,3 +99,8 @@ You will see output similar to the following:
 ## Cleaning Up
 After you are finished testing out the application deployment, simply run the following command in your shell to delete the resources used.
 `kubectl delete -f ./`
+
+You can stop the minikube cluster with:
+```Bash
+minikube stop
+```
