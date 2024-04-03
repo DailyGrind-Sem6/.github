@@ -6,4 +6,4 @@ Unlike general content platforms like Reddit and Twitter, Coffee Dev is specific
 
 ## Documentation
 
-For more information on how to use Coffee Dev, contribute to the project, or set up your own instance, please refer to our [documentation](https://gokay-atalay-sem6.github.io/Docs).
+For more information on the process of creating Coffee Dev, please refer to the [documentation](https://gokay-atalay-sem6.github.io/Docs).
