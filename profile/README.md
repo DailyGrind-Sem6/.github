@@ -6,4 +6,4 @@ Unlike general content platforms like Reddit and Twitter, DailyGrind is specific
 
 ## Documentation
 
-For more information on the process of creating DailyGrind, please refer to the [documentation](https://gokay-atalay-sem6.github.io/Docs).
+For more information on the process of creating DailyGrind, please refer to the [documentation](https://dailygrind-sem6.github.io/Docs/).
